@@ -1,17 +1,63 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { assets, blog_data, blogCategories } from '../assets/assets'
+import { blogAPI } from '../services/api'
 import BlogItem from '../components/BlogItem'
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
+  const [blogs, setBlogs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // Fetch blogs from database on mount
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const response = await blogAPI.getAllBlogs('All')
+        
+        if (response.success && response.blogs) {
+          // Combine database blogs with static data (database takes priority)
+          const dbBlogIds = new Set(response.blogs.map(b => b._id))
+          const staticBlogs = blog_data.filter(b => !dbBlogIds.has(b._id))
+          setBlogs([...response.blogs, ...staticBlogs])
+        } else {
+          // Fallback to static data if API fails
+          setBlogs(blog_data)
+        }
+      } catch (err) {
+        console.warn('Failed to fetch blogs from database, using static data:', err)
+        // Fallback to static data
+        setBlogs(blog_data)
+        setError(null) // Don't show error to user, just use static data
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBlogs()
+  }, [])
 
   // Filter blogs based on category and search term
-  const filteredBlogs = blog_data.filter(blog => {
+  const filteredBlogs = blogs.filter(blog => {
     const categoryMatch = selectedCategory === 'All' || blog.category === selectedCategory
     const searchMatch = blog.title.toLowerCase().includes(searchTerm.toLowerCase())
-    return categoryMatch && searchMatch && blog.isPublished
+    return categoryMatch && searchMatch && blog.isPublished !== false
   })
+
+  if (loading) {
+    return (
+      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600 mx-auto mb-4'></div>
+          <p className='text-gray-600'>Loading blogs...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className='min-h-screen bg-gray-50'>

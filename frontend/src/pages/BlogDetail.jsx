@@ -1,13 +1,72 @@
 import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { blogAPI } from '../services/api'
 import { blog_data } from '../assets/assets'
 
 const BlogDetail = () => {
   const { id } = useParams()
-  
-  // Find the blog post by ID
-  const blog = blog_data.find(post => post._id === id)
+  const [blog, setBlog] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [relatedBlogs, setRelatedBlogs] = useState([])
 
-  if (!blog) {
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Try to fetch from database first
+        const response = await blogAPI.getBlog(id)
+        
+        if (response.success) {
+          setBlog(response.blog)
+          // Fetch related blogs
+          try {
+            const allBlogs = await blogAPI.getAllBlogs(response.blog.category)
+            if (allBlogs.success) {
+              const related = allBlogs.blogs
+                .filter(b => b._id !== id && b.category === response.blog.category)
+                .slice(0, 3)
+              setRelatedBlogs(related)
+            }
+          } catch (err) {
+            console.warn('Could not fetch related blogs:', err)
+          }
+        }
+      } catch (err) {
+        console.warn('Database fetch failed, trying static data:', err)
+        // Fallback to static data if database fetch fails
+        const staticBlog = blog_data.find(post => post._id === id)
+        if (staticBlog) {
+          setBlog(staticBlog)
+          const related = blog_data
+            .filter(post => post.category === staticBlog.category && post._id !== id)
+            .slice(0, 3)
+          setRelatedBlogs(related)
+        } else {
+          setError('Blog not found')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBlog()
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className='min-h-screen bg-gray-50 py-12 px-4 flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600 mx-auto mb-4'></div>
+          <p className='text-gray-600'>Loading blog...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !blog) {
     return (
       <div className='min-h-screen bg-gray-50 py-12 px-4'>
         <div className='max-w-4xl mx-auto text-center'>
@@ -20,11 +79,6 @@ const BlogDetail = () => {
       </div>
     )
   }
-
-  // Find related blogs (same category, but different post)
-  const relatedBlogs = blog_data
-    .filter(post => post.category === blog.category && post._id !== blog._id)
-    .slice(0, 3)
 
   return (
     <div className='min-h-screen bg-white'>
@@ -51,9 +105,16 @@ const BlogDetail = () => {
           </p>
 
           {/* Author Badge */}
-          <div className='flex justify-center'>
+          <div className='flex justify-center items-center gap-3'>
+            {blog.author?.avatar && (
+              <img 
+                src={blog.author.avatar} 
+                alt={blog.author?.name}
+                className='w-10 h-10 rounded-full'
+              />
+            )}
             <span className='inline-block px-4 py-2 bg-white border border-indigo-200 text-indigo-600 text-sm font-semibold rounded-full'>
-              Michael Brown
+              {blog.author?.name || 'Anonymous'}
             </span>
           </div>
         </div>

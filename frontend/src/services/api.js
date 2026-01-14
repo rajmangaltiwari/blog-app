@@ -37,4 +37,13 @@ export const userAPI = {
   updateProfile: (data) => apiClient.put('/users/update', data),
 };
 
+export const blogAPI = {
+  createBlog: (data) => apiClient.post('/blogs/create', data),
+  getAllBlogs: (category) => apiClient.get('/blogs/all', { params: { category } }),
+  getBlog: (id) => apiClient.get(`/blogs/${id}`),
+  getUserBlogs: () => apiClient.get('/blogs/user/my-blogs'),
+  updateBlog: (id, data) => apiClient.put(`/blogs/${id}`, data),
+  deleteBlog: (id) => apiClient.delete(`/blogs/${id}`),
+};
+
 export default apiClient;
