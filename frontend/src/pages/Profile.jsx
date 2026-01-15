@@ -22,7 +22,7 @@ const Profile = () => {
   // Fetch user details and blogs
   useEffect(() => {
     if (!user) {
-      setLoading(false)
+      // Still show loading while waiting for user to load
       return
     }
 
@@ -45,10 +45,13 @@ const Profile = () => {
         const blogsRes = await blogAPI.getUserBlogs()
         if (blogsRes.success) {
           setUserBlogs(blogsRes.blogs)
+        } else {
+          setUserBlogs([])
         }
       } catch (err) {
         console.error('Error fetching user blogs:', err)
-        setError('Failed to load profile data')
+        setError('Failed to load blogs')
+        setUserBlogs([])
       } finally {
         setLoading(false)
       }
