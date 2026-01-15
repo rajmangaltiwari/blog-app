@@ -25,15 +25,18 @@ const Home = () => {
         const response = await blogAPI.getAllBlogs(selectedCategory, 1, BLOGS_PER_PAGE)
         
         if (response.success && response.blogs) {
-          setBlogs(response.blogs)
+          // Combine database blogs with static data (database takes priority)
+          const dbBlogIds = new Set(response.blogs.map(b => b._id))
+          const staticBlogs = blog_data.filter(b => !dbBlogIds.has(b._id))
+          setBlogs([...response.blogs, ...staticBlogs])
           setHasMore(response.currentPage < response.totalPages)
         } else {
-          setBlogs([])
+          setBlogs(blog_data)
         }
       } catch (err) {
-        console.warn('Failed to fetch blogs:', err)
-        setBlogs([])
-        setError('Failed to load blogs')
+        console.warn('Failed to fetch blogs from database, using static data:', err)
+        setBlogs(blog_data)
+        setError(null) // Don't show error to user, just use static data
       } finally {
         setLoading(false)
       }

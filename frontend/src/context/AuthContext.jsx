@@ -1,9 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { userAPI } from '../services/api';
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('authToken'));
   const [loading, setLoading] = useState(false);
@@ -121,3 +121,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export { AuthProvider, AuthContext };
