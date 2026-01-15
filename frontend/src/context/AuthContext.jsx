@@ -20,16 +20,22 @@ const AuthProvider = ({ children }) => {
   const fetchCurrentUser = async () => {
     try {
       const data = await userAPI.getMe();
-      if (data.success) {
+      if (data && data.success) {
         setUser(data.user);
       } else {
+        // If response doesn't have success flag, still log out
         setToken(null);
         localStorage.removeItem('authToken');
       }
     } catch (err) {
       console.error('Error fetching user:', err);
-      setToken(null);
-      localStorage.removeItem('authToken');
+      // Only clear token on 401, not on other errors
+      if (err.response?.status === 401) {
+        setToken(null);
+        localStorage.removeItem('authToken');
+      }
+      // For other errors (like 404, 500), keep the user logged in
+      // This prevents accidental logouts due to temporary server issues
     }
   };
 
