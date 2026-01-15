@@ -15,7 +15,7 @@ const CreateBlogBtn = () => {
     return (
       <Link
         to="/create"
-        className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-2xl hover:shadow-xl hover:scale-110 transition transform flex items-center justify-center text-white text-4xl z-40"
+        className="fixed bottom-8 right-8 w-16 h-16 bg-linear-to-r from-indigo-600 to-purple-600 rounded-full shadow-2xl hover:shadow-xl hover:scale-110 transition transform flex items-center justify-center text-white text-4xl z-40"
         title="Create a new blog post"
       >
         ✍️

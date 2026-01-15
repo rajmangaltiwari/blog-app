@@ -44,7 +44,7 @@ const Navbar = () => {
               <div className='relative'>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className='flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white cursor-pointer rounded-lg hover:from-indigo-700 hover:to-blue-700 transition'
+                  className='flex items-center gap-2 px-4 py-2 bg-linear-to-r from-indigo-600 to-blue-600 text-white cursor-pointer rounded-lg hover:from-indigo-700 hover:to-blue-700 transition'
                 >
                   <span className='text-sm font-medium'>{user?.name || 'User'}</span>
                 </button>
@@ -57,18 +57,18 @@ const Navbar = () => {
                       <p className='text-xs text-gray-600'>{user?.email}</p>
                     </div>
                     <Link
-                      to='/'
+                      to='/profile'
                       onClick={() => setIsUserMenuOpen(false)}
                       className='block px-4 py-2 text-gray-700 hover:bg-gray-100 transition'
                     >
                       Profile
                     </Link>
                     <Link
-                      to='/'
+                      to='/profile'
                       onClick={() => setIsUserMenuOpen(false)}
                       className='block px-4 py-2 text-gray-700 hover:bg-gray-100 transition'
                     >
-                      Settings
+                      My Blogs
                     </Link>
                     <button
                       onClick={handleLogout}
@@ -157,18 +157,18 @@ const Navbar = () => {
                   <p className='text-xs text-gray-600'>{user?.email}</p>
                 </div>
                 <Link
-                  to='/'
+                  to='/profile'
                   onClick={() => setIsMenuOpen(false)}
                   className='block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-200 transition'
                 >
                   Profile
                 </Link>
                 <Link
-                  to='/'
+                  to='/profile'
                   onClick={() => setIsMenuOpen(false)}
                   className='block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-200 transition'
                 >
-                  Settings
+                  My Blogs
                 </Link>
                 <button
                   onClick={handleLogout}

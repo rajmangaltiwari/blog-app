@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthContext'
 import Home from './pages/Home'
 import BlogDetail from './pages/BlogDetail'
 import CreateBlog from './pages/CreateBlog'
+import Profile from './pages/Profile'
+import EditBlog from './pages/EditBlog'
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
 import Navbar from './components/Navbar'
@@ -14,7 +16,7 @@ const AppContent = () => {
   const location = useLocation()
   
   // Hide navbar and footer on these routes
-  const hideNavbarFooter = ['/login', '/signup', '/create'].includes(location.pathname)
+  const hideNavbarFooter = ['/login', '/signup', '/create', '/edit'].some(route => location.pathname.startsWith(route))
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -30,6 +32,22 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <CreateBlog />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path='/profile' 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path='/edit/:id' 
+            element={
+              <ProtectedRoute>
+                <EditBlog />
               </ProtectedRoute>
             } 
           />
