@@ -8,7 +8,11 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [blogs, setBlogs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const BLOGS_PER_PAGE = 10
 
   // Fetch blogs from database on mount
   useEffect(() => {
@@ -16,36 +20,52 @@ const Home = () => {
       try {
         setLoading(true)
         setError(null)
+        setCurrentPage(1)
         
-        const response = await blogAPI.getAllBlogs('All')
+        const response = await blogAPI.getAllBlogs(selectedCategory, 1, BLOGS_PER_PAGE)
         
         if (response.success && response.blogs) {
-          // Combine database blogs with static data (database takes priority)
-          const dbBlogIds = new Set(response.blogs.map(b => b._id))
-          const staticBlogs = blog_data.filter(b => !dbBlogIds.has(b._id))
-          setBlogs([...response.blogs, ...staticBlogs])
+          setBlogs(response.blogs)
+          setHasMore(response.currentPage < response.totalPages)
         } else {
-          // Fallback to static data if API fails
-          setBlogs(blog_data)
+          setBlogs([])
         }
       } catch (err) {
-        console.warn('Failed to fetch blogs from database, using static data:', err)
-        // Fallback to static data
-        setBlogs(blog_data)
-        setError(null) // Don't show error to user, just use static data
+        console.warn('Failed to fetch blogs:', err)
+        setBlogs([])
+        setError('Failed to load blogs')
       } finally {
         setLoading(false)
       }
     }
 
     fetchBlogs()
-  }, [])
+  }, [selectedCategory])
 
-  // Filter blogs based on category and search term
+  // Load more blogs
+  const loadMoreBlogs = async () => {
+    try {
+      setLoadingMore(true)
+      const nextPage = currentPage + 1
+      
+      const response = await blogAPI.getAllBlogs(selectedCategory, nextPage, BLOGS_PER_PAGE)
+      
+      if (response.success && response.blogs) {
+        setBlogs(prev => [...prev, ...response.blogs])
+        setCurrentPage(nextPage)
+        setHasMore(nextPage < response.totalPages)
+      }
+    } catch (err) {
+      console.warn('Failed to load more blogs:', err)
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
+  // Filter blogs based on search term
   const filteredBlogs = blogs.filter(blog => {
-    const categoryMatch = selectedCategory === 'All' || blog.category === selectedCategory
     const searchMatch = blog.title.toLowerCase().includes(searchTerm.toLowerCase())
-    return categoryMatch && searchMatch && blog.isPublished !== false
+    return searchMatch && blog.isPublished !== false
   })
 
   if (loading) {
@@ -118,15 +138,30 @@ const Home = () => {
       <section className='py-12 px-4'>
         <div className='max-w-6xl mx-auto'>
           {filteredBlogs.length > 0 ? (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8'>
-              {filteredBlogs.map((blog, index) => (
-                <BlogItem 
-                  key={blog._id} 
-                  blog={blog}
-                  isNew={index === 0}
-                />
-              ))}
-            </div>
+            <>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8'>
+                {filteredBlogs.map((blog, index) => (
+                  <BlogItem 
+                    key={blog._id} 
+                    blog={blog}
+                    isNew={index === 0}
+                  />
+                ))}
+              </div>
+
+              {/* Load More Button */}
+              {hasMore && (
+                <div className='mt-12 text-center'>
+                  <button
+                    onClick={loadMoreBlogs}
+                    disabled={loadingMore}
+                    className='px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium disabled:bg-gray-400'
+                  >
+                    {loadingMore ? 'Loading...' : 'Load More Blogs'}
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className='text-center py-12'>
               <p className='text-gray-500 text-lg'>No blogs found matching your search.</p>

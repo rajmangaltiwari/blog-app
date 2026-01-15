@@ -54,7 +54,7 @@ exports.createBlog = async (req, res) => {
 // Get all published blogs
 exports.getAllBlogs = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, page = 1, limit = 10 } = req.query;
 
     // Build filter
     let filter = { isPublished: true };
@@ -62,14 +62,23 @@ exports.getAllBlogs = async (req, res) => {
       filter.category = category;
     }
 
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
     const blogs = await Blog.find(filter)
       .populate('author', 'name avatar email')
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
       .lean();
+
+    const totalCount = await Blog.countDocuments(filter);
 
     res.status(200).json({
       success: true,
       count: blogs.length,
+      totalCount,
+      totalPages: Math.ceil(totalCount / parseInt(limit)),
+      currentPage: parseInt(page),
       blogs,
     });
   } catch (error) {

@@ -39,7 +39,7 @@ export const userAPI = {
 
 export const blogAPI = {
   createBlog: (data) => apiClient.post('/blogs/create', data),
-  getAllBlogs: (category) => apiClient.get('/blogs/all', { params: { category } }),
+  getAllBlogs: (category, page = 1, limit = 10) => apiClient.get('/blogs/all', { params: { category, page, limit } }),
   getBlog: (id) => apiClient.get(`/blogs/${id}`),
   getUserBlogs: () => apiClient.get('/blogs/user/my-blogs'),
   updateBlog: (id, data) => apiClient.put(`/blogs/${id}`, data),

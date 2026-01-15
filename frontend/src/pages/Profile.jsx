@@ -21,23 +21,25 @@ const Profile = () => {
 
   // Fetch user details and blogs
   useEffect(() => {
+    if (!user) {
+      setLoading(false)
+      return
+    }
+
     const fetchUserData = async () => {
       try {
         setLoading(true)
         setError(null)
 
-        // Fetch user details
-        const userRes = await userAPI.getMe()
-        if (userRes.success) {
-          setUserDetails(userRes.user)
-          setEditData({
-            name: userRes.user.name,
-            email: userRes.user.email,
-            bio: userRes.user.bio || '',
-            avatar: userRes.user.avatar,
-          })
-          setPreviewAvatar(userRes.user.avatar)
-        }
+        // Use user from context instead of fetching again
+        setUserDetails(user)
+        setEditData({
+          name: user.name,
+          email: user.email,
+          bio: user.bio || '',
+          avatar: user.avatar,
+        })
+        setPreviewAvatar(user.avatar)
 
         // Fetch user blogs
         const blogsRes = await blogAPI.getUserBlogs()
@@ -45,7 +47,7 @@ const Profile = () => {
           setUserBlogs(blogsRes.blogs)
         }
       } catch (err) {
-        console.error('Error fetching user data:', err)
+        console.error('Error fetching user blogs:', err)
         setError('Failed to load profile data')
       } finally {
         setLoading(false)
@@ -53,7 +55,7 @@ const Profile = () => {
     }
 
     fetchUserData()
-  }, [])
+  }, [user])
 
   const handleEditChange = (e) => {
     const { name, value } = e.target
