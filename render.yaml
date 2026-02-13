@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: blog-app
+    env: node
+    region: oregon
+    plan: free
+    
+    # Run from backend directory
+    rootDir: backend
+    
+    # Build command - installs frontend and builds it
+    buildCommand: npm run build
+    
+    # Start command
+    startCommand: npm start
+    
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_BASE_URL
+        value: https://blog-app-xxxxx.onrender.com/api
+        # Replace xxxxx with your actual Render service ID
+      - key: MONGODB_URI
+        sync: false
+        # Add in Render dashboard

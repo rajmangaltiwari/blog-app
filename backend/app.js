@@ -31,17 +31,21 @@ connectDB();
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/blogs', require('./routes/blogRoutes'));
 
-// Serve static files from frontend build
+// Serve static files from frontend build (MUST be before catch-all route)
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-// Basic route
+// Basic API route
 app.get('/api', (req, res) => {
   res.send('Blog App API is running!');
 });
 
-// Catch-all route - serve index.html for SPA (MUST be before error middleware)
+// Catch-all route - serve index.html for SPA (MUST be last before error middleware)
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'), (err) => {
+    if (err) {
+      res.status(404).send('Page not found');
+    }
+  });
 });
 
 // Error handling middleware
