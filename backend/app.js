@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // Load environment variables
 dotenv.config();
@@ -30,9 +31,17 @@ connectDB();
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/blogs', require('./routes/blogRoutes'));
 
+// Serve static files from frontend build
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
 // Basic route
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send('Blog App API is running!');
+});
+
+// Catch-all route - serve index.html for SPA (MUST be before error middleware)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
 // Error handling middleware
