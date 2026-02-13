@@ -22,7 +22,15 @@ const Home = () => {
         setError(null)
         setCurrentPage(1)
         
-        const response = await blogAPI.getAllBlogs(selectedCategory, 1, BLOGS_PER_PAGE)
+        // Add a race condition with a timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('API request timeout')), 10000)
+        )
+        
+        const response = await Promise.race([
+          blogAPI.getAllBlogs(selectedCategory, 1, BLOGS_PER_PAGE),
+          timeoutPromise
+        ])
         
         if (response.success && response.blogs) {
           // Combine database blogs with static data (database takes priority)
@@ -34,8 +42,8 @@ const Home = () => {
           setBlogs(blog_data)
         }
       } catch (err) {
-        console.warn('Failed to fetch blogs from database, using static data:', err)
-        setBlogs(blog_data)
+        console.warn('Failed to fetch blogs from API:', err.message)
+        setBlogs(blog_data) // Fallback to static data immediately
         setError(null) // Don't show error to user, just use static data
       } finally {
         setLoading(false)

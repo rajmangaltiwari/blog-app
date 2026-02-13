@@ -7,6 +7,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 8000, // 8 second timeout to prevent hanging
 });
 
 // Add token to requests
